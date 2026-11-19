@@ -18,7 +18,6 @@ import co.edu.uniquindio.cinemauq.model.enums.TipoReporte;
 import co.edu.uniquindio.cinemauq.service.EstadisticasService;
 import co.edu.uniquindio.cinemauq.util.Formato;
 import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -89,12 +88,13 @@ public class AdminView {
 
     private HBox encabezado() {
         Label titulo = new Label("CinemaUQ  ·  Panel de administración  ·  " + controller.getAdmin().getNombre());
-        titulo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
+        titulo.getStyleClass().add("top-bar-title");
         Button salir = new Button("Cerrar sesión");
+        salir.getStyleClass().add("button-secondary");
         salir.setOnAction(e -> App.mostrarLogin());
         HBox h = new HBox(20, titulo, UI.espacio(), salir);
         h.setPadding(new Insets(12));
-        h.setStyle("-fx-background-color: " + UI.COLOR_PRIMARIO + "; -fx-alignment: center-left;");
+        h.getStyleClass().add("top-bar");
         return h;
     }
 
@@ -203,7 +203,7 @@ public class AdminView {
             refrescar();
         }));
         Button cancelar = new Button("Cancelar función (reembolso 100 %)");
-        cancelar.setStyle("-fx-background-color: #c62828; -fx-text-fill: white;");
+        cancelar.getStyleClass().add("button-destructive");
         cancelar.setOnAction(e -> UI.ejecutar(() -> {
             Funcion f = tablaFunciones.getSelectionModel().getSelectedItem();
             if (f != null && !UI.confirmar("¿Cancelar la función " + f + "?\nSe devolverá el 100 % a todos los compradores.")) {
@@ -402,13 +402,12 @@ public class AdminView {
 
     private void tarjeta(int col, int fila, String titulo, String valor) {
         Label t = new Label(titulo);
-        t.setStyle("-fx-text-fill: #5c6bc0; -fx-font-weight: bold;");
+        t.getStyleClass().add("dashboard-card-title");
         Label v = new Label(valor);
-        v.setStyle("-fx-font-size: 15px;");
+        v.getStyleClass().add("dashboard-card-value");
         VBox box = new VBox(6, t, v);
-        box.setPadding(new Insets(12));
         box.setPrefSize(330, 110);
-        box.setStyle("-fx-background-color: white; -fx-border-color: #c5cae9; -fx-border-radius: 6; -fx-background-radius: 6;");
+        box.getStyleClass().add("dashboard-card");
         panelEstadisticas.add(box, col, fila);
     }
 
@@ -420,7 +419,7 @@ public class AdminView {
         DatePicker hasta = new DatePicker(LocalDate.now());
         TextArea area = new TextArea();
         area.setEditable(false);
-        area.setStyle("-fx-font-family: 'monospaced'; -fx-font-size: 12px;");
+        area.getStyleClass().add("report-output");
         VBox.setVgrow(area, Priority.ALWAYS);
         Button generar = new Button("Generar");
         generar.setStyle(UI.estiloBoton());

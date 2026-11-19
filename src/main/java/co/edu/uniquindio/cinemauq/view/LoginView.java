@@ -33,9 +33,9 @@ public class LoginView {
 
     private void construir() {
         Label logo = new Label("CinemaUQ");
-        logo.setStyle("-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: white;");
+        logo.getStyleClass().add("brand-title");
         Label sub = new Label("Cartelera, entradas, confitería y puntos");
-        sub.setStyle("-fx-text-fill: #c5cae9;");
+        sub.getStyleClass().add("brand-subtitle");
 
         txtEmail.setPromptText("Correo electrónico");
         txtPassword.setPromptText("Contraseña");
@@ -43,22 +43,25 @@ public class LoginView {
         txtPassword.setMaxWidth(300);
 
         Button btnIngresar = new Button("Ingresar");
-        btnIngresar.setStyle("-fx-background-color: #ffca28; -fx-font-weight: bold;");
+        btnIngresar.getStyleClass().add("button-primary");
         btnIngresar.setPrefWidth(300);
+        btnIngresar.setMaxWidth(Double.MAX_VALUE);
         btnIngresar.setOnAction(e -> ingresar());
         txtPassword.setOnAction(e -> ingresar());
 
         Hyperlink lnkRegistro = new Hyperlink("¿No tiene cuenta? Regístrese aquí");
-        lnkRegistro.setStyle("-fx-text-fill: white;");
         lnkRegistro.setOnAction(e -> mostrarRegistro());
 
         Label ayuda = new Label("Usuarios de prueba:\nadmin@cinemauq.com / admin123\nana@mail.com / 1234   ·   carlos@mail.com / 1234");
-        ayuda.setStyle("-fx-text-fill: #9fa8da; -fx-font-size: 11px;");
+        ayuda.getStyleClass().add("login-help");
 
-        root.getChildren().addAll(logo, sub, txtEmail, txtPassword, btnIngresar, lnkRegistro, ayuda);
+        VBox tarjeta = new VBox(14, logo, sub, txtEmail, txtPassword, btnIngresar, lnkRegistro, ayuda);
+        tarjeta.setAlignment(Pos.CENTER);
+        tarjeta.getStyleClass().add("login-card");
+        root.getChildren().add(tarjeta);
         root.setAlignment(Pos.CENTER);
         root.setPadding(new Insets(30));
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a237e, #283593);");
+        root.getStyleClass().add("login-screen");
     }
 
     private void ingresar() {

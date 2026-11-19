@@ -70,14 +70,15 @@ public class ClienteView {
 
     private HBox encabezado() {
         Label titulo = new Label("CinemaUQ  ·  Hola, " + cliente.getNombre());
-        titulo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: white;");
-        lblSaldo.setStyle("-fx-text-fill: #ffca28; -fx-font-weight: bold;");
-        lblPuntos.setStyle("-fx-text-fill: #80deea; -fx-font-weight: bold;");
+        titulo.getStyleClass().add("top-bar-title");
+        lblSaldo.getStyleClass().add("top-bar-metric");
+        lblPuntos.getStyleClass().add("top-bar-metric");
         Button salir = new Button("Cerrar sesión");
+        salir.getStyleClass().add("button-secondary");
         salir.setOnAction(e -> App.mostrarLogin());
         HBox h = new HBox(20, titulo, UI.espacio(), lblSaldo, lblPuntos, salir);
         h.setPadding(new Insets(12));
-        h.setStyle("-fx-background-color: " + UI.COLOR_PRIMARIO + "; -fx-alignment: center-left;");
+        h.getStyleClass().add("top-bar");
         return h;
     }
 

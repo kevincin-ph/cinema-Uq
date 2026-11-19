@@ -22,8 +22,6 @@ import java.util.function.Function;
 /** Utilidades de la vista: tablas, alertas y estilos comunes. */
 public final class UI {
 
-    public static final String COLOR_PRIMARIO = "#1a237e";
-
     private UI() { }
 
     /** Acción de la vista que puede lanzar excepciones del dominio. */
@@ -102,18 +100,20 @@ public final class UI {
 
     public static Label titulo(String texto) {
         Label l = new Label(texto);
-        l.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + COLOR_PRIMARIO + ";");
+        l.getStyleClass().add("section-title");
         return l;
     }
 
     public static VBox caja(Node... nodos) {
         VBox v = new VBox(10, nodos);
         v.setPadding(new Insets(12));
+        v.getStyleClass().add("card");
         return v;
     }
 
     public static HBox fila(Node... nodos) {
         HBox h = new HBox(8, nodos);
+        h.getStyleClass().add("form-row");
         h.setStyle("-fx-alignment: center-left;");
         return h;
     }
@@ -123,7 +123,7 @@ public final class UI {
         g.setHgap(8);
         g.setVgap(8);
         g.setPadding(new Insets(10));
-        g.setStyle("-fx-background-color: #f5f5f5; -fx-background-radius: 6;");
+        g.getStyleClass().add("form-card");
         return g;
     }
 
@@ -134,6 +134,6 @@ public final class UI {
     }
 
     public static String estiloBoton() {
-        return "-fx-background-color: " + COLOR_PRIMARIO + "; -fx-text-fill: white; -fx-font-weight: bold;";
+        return "-fx-background-color: #0071e3; -fx-text-fill: white; -fx-font-weight: bold;";
     }
 }

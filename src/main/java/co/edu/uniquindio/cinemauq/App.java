@@ -11,6 +11,7 @@ import co.edu.uniquindio.cinemauq.view.AdminView;
 import co.edu.uniquindio.cinemauq.view.ClienteView;
 import co.edu.uniquindio.cinemauq.view.LoginView;
 import javafx.application.Application;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -31,20 +32,27 @@ public class App extends Application {
 
     public static void mostrarLogin() {
         LoginView vista = new LoginView(new LoginController(facade));
-        stage.setScene(new Scene(vista.getRoot(), 480, 460));
+        stage.setScene(escena(vista.getRoot(), 500, 520));
         stage.centerOnScreen();
     }
 
     public static void mostrarCliente(Cliente cliente) {
         ClienteView vista = new ClienteView(new ClienteController(facade, cliente));
-        stage.setScene(new Scene(vista.getRoot(), 1150, 720));
+        stage.setScene(escena(vista.getRoot(), 1150, 720));
         stage.centerOnScreen();
     }
 
     public static void mostrarAdmin(Administrador admin) {
         AdminView vista = new AdminView(new AdminController(facade, admin));
-        stage.setScene(new Scene(vista.getRoot(), 1280, 780));
+        stage.setScene(escena(vista.getRoot(), 1280, 780));
         stage.centerOnScreen();
+    }
+
+    private static Scene escena(Parent root, double ancho, double alto) {
+        Scene scene = new Scene(root, ancho, alto);
+        scene.getStylesheets().add(App.class.getResource(
+                "/co/edu/uniquindio/cinemauq/view/cinema.css").toExternalForm());
+        return scene;
     }
 
     public static void main(String[] args) {

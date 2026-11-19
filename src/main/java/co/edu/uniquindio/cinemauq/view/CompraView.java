@@ -41,10 +41,10 @@ import java.util.Set;
 /** Ventana de compra: selección gráfica de asientos, confitería, promoción y pago. */
 public class CompraView {
 
-    private static final String VERDE = "#43a047";
-    private static final String DORADO = "#f9a825";
-    private static final String GRIS = "#9e9e9e";
-    private static final String AZUL = "#1e88e5";
+    private static final String VERDE = "#dbeafe";
+    private static final String DORADO = "#fef3c7";
+    private static final String GRIS = "#c7c7cc";
+    private static final String AZUL = "#0071e3";
 
     private final ClienteController controller;
     private final Funcion funcion;
@@ -79,7 +79,10 @@ public class CompraView {
         root.setCenter(centro);
         root.setRight(panelResumen());
 
-        stage.setScene(new Scene(root, 1260, 640));
+        Scene scene = new Scene(root, 1260, 640);
+        scene.getStylesheets().add(CompraView.class.getResource(
+                "/co/edu/uniquindio/cinemauq/view/cinema.css").toExternalForm());
+        stage.setScene(scene);
         actualizarResumen();
         stage.showAndWait();
     }
@@ -88,7 +91,7 @@ public class CompraView {
         Label pantalla = new Label("PANTALLA");
         pantalla.setMaxWidth(Double.MAX_VALUE);
         pantalla.setAlignment(Pos.CENTER);
-        pantalla.setStyle("-fx-background-color: #263238; -fx-text-fill: white; -fx-padding: 4;");
+        pantalla.getStyleClass().add("seat-screen");
 
         GridPane grid = new GridPane();
         grid.setHgap(4);
@@ -136,7 +139,9 @@ public class CompraView {
     }
 
     private void colorear(ButtonBase b, String color) {
-        b.setStyle("-fx-background-color: " + color + "; -fx-text-fill: white; -fx-font-size: 10px; -fx-opacity: 1;");
+        String textColor = AZUL.equals(color) ? "white" : "#1d1d1f";
+        b.setStyle("-fx-background-color: " + color + "; -fx-text-fill: " + textColor
+                + "; -fx-font-size: 10px; -fx-background-radius: 8; -fx-border-radius: 8; -fx-opacity: 1;");
     }
 
     private Node panelConfiteria() {
@@ -174,7 +179,7 @@ public class CompraView {
 
         resumen.setEditable(false);
         resumen.setPrefWidth(340);
-        resumen.setStyle("-fx-font-family: 'monospaced'; -fx-font-size: 11px;");
+        resumen.getStyleClass().add("purchase-summary");
         VBox.setVgrow(resumen, Priority.ALWAYS);
 
         Button confirmar = new Button("Confirmar y pagar");
