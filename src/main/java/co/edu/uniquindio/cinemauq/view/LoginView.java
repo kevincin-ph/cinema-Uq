@@ -2,6 +2,7 @@ package co.edu.uniquindio.cinemauq.view;
 
 import co.edu.uniquindio.cinemauq.App;
 import co.edu.uniquindio.cinemauq.controller.LoginController;
+import co.edu.uniquindio.cinemauq.exceptions.CinemaException;
 import co.edu.uniquindio.cinemauq.model.Administrador;
 import co.edu.uniquindio.cinemauq.model.Cliente;
 import co.edu.uniquindio.cinemauq.model.Usuario;
@@ -25,6 +26,8 @@ public class LoginView {
     private final VBox root = new VBox(12);
     private final TextField txtEmail = new TextField();
     private final PasswordField txtPassword = new PasswordField();
+    private final Button btnIngresar = new Button("Ingresar");
+    private final Label lblEstado = new Label();
 
     public LoginView(LoginController controller) {
         this.controller = controller;
@@ -42,12 +45,17 @@ public class LoginView {
         txtEmail.setMaxWidth(300);
         txtPassword.setMaxWidth(300);
 
-        Button btnIngresar = new Button("Ingresar");
         btnIngresar.getStyleClass().add("button-primary");
         btnIngresar.setPrefWidth(300);
         btnIngresar.setMaxWidth(Double.MAX_VALUE);
         btnIngresar.setOnAction(e -> ingresar());
+        btnIngresar.setDefaultButton(true);
         txtPassword.setOnAction(e -> ingresar());
+
+        lblEstado.getStyleClass().add("login-status");
+        lblEstado.setWrapText(true);
+        lblEstado.setVisible(false);
+        lblEstado.setManaged(false);
 
         Hyperlink lnkRegistro = new Hyperlink("¿No tiene cuenta? Regístrese aquí");
         lnkRegistro.setOnAction(e -> mostrarRegistro());
@@ -55,7 +63,7 @@ public class LoginView {
         Label ayuda = new Label("Usuarios de prueba:\nadmin@cinemauq.com / admin123\nana@mail.com / 1234   ·   carlos@mail.com / 1234");
         ayuda.getStyleClass().add("login-help");
 
-        VBox tarjeta = new VBox(14, logo, sub, txtEmail, txtPassword, btnIngresar, lnkRegistro, ayuda);
+        VBox tarjeta = new VBox(14, logo, sub, txtEmail, txtPassword, lblEstado, btnIngresar, lnkRegistro, ayuda);
         tarjeta.setAlignment(Pos.CENTER);
         tarjeta.getStyleClass().add("login-card");
         root.getChildren().add(tarjeta);
@@ -65,14 +73,32 @@ public class LoginView {
     }
 
     private void ingresar() {
-        UI.ejecutar(() -> {
+        btnIngresar.setDisable(true);
+        lblEstado.setText("Verificando acceso…");
+        lblEstado.setVisible(true);
+        lblEstado.setManaged(true);
+        try {
             Usuario u = controller.iniciarSesion(txtEmail.getText(), txtPassword.getText());
             if (u instanceof Administrador a) {
                 App.mostrarAdmin(a);
             } else if (u instanceof Cliente c) {
                 App.mostrarCliente(c);
+            } else {
+                throw new IllegalStateException("El usuario no tiene un rol reconocido.");
             }
-        });
+        } catch (CinemaException e) {
+            mostrarError(e.getMessage());
+        } catch (RuntimeException e) {
+            mostrarError("No se pudo abrir el panel: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            btnIngresar.setDisable(false);
+        }
+    }
+
+    private void mostrarError(String mensaje) {
+        lblEstado.setText(mensaje);
+        lblEstado.getStyleClass().add("login-status-error");
     }
 
     private void mostrarRegistro() {

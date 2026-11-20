@@ -18,6 +18,7 @@ import co.edu.uniquindio.cinemauq.model.enums.TipoReporte;
 import co.edu.uniquindio.cinemauq.service.EstadisticasService;
 import co.edu.uniquindio.cinemauq.util.Formato;
 import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
