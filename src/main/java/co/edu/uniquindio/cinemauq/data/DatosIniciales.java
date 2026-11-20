@@ -87,7 +87,7 @@ public class DatosIniciales {
 
         // Puntos con distintas fechas: uno vencido y uno próximo a vencer
         ana.getCuentaPuntos().acumular(500, ahora.minusMonths(13), "Bono de bienvenida");
-        ana.getCuentaPuntos().acumular(800, ahora.minusMonths(11), "Bono de fidelidad");
+        ana.getCuentaPuntos().acumular(2000, ahora.minusYears(1).plusDays(15), "Bono de fidelidad"); // vence en 15 días: muestra el aviso
 
         // ---------- Películas ----------
         Pelicula p1 = cartelera.agregarPelicula("Dune: Parte Dos", Genero.CIENCIA_FICCION, 166, "+12",

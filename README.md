@@ -22,5 +22,9 @@ Proyecto final de Programación II (Universidad del Quindío). Java 17+, JavaFX 
 
 ## Regla de puntos
 1 punto por cada $100 pagados con tarjeta. 1 punto = $10 al redimir. Vigencia de 1 año; se usan primero los más próximos a vencer.
+Cuando al cliente le quedan puntos que vencen en los próximos 30 días, la aplicación le muestra un aviso y resalta esos lotes en naranja.
+
+## Búsqueda en cartelera
+El cliente puede buscar películas por título (sin importar tildes ni mayúsculas) y filtrarlas por género.
 
 El diagrama de clases está en `docs/DiagramaClases_CinemaUQ.pdf`.

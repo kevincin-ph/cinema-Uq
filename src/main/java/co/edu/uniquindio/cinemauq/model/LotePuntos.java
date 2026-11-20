@@ -22,6 +22,11 @@ public class LotePuntos {
         return hoy.isBefore(fechaVencimiento);
     }
 
+    /** Un lote está por vencer si sigue vigente, le quedan puntos y vence dentro de los próximos 'dias' días. */
+    public boolean isPorVencer(LocalDate hoy, int dias) {
+        return isVigente(hoy) && puntosDisponibles > 0 && !fechaVencimiento.isAfter(hoy.plusDays(dias));
+    }
+
     public void consumir(int puntos) {
         if (puntos > puntosDisponibles) {
             throw new IllegalArgumentException("El lote no tiene tantos puntos");

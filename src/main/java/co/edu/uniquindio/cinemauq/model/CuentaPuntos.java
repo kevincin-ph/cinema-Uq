@@ -35,6 +35,17 @@ public class CuentaPuntos {
         return lotes.stream().filter(l -> !l.isVigente(hoy)).mapToInt(LotePuntos::getPuntosDisponibles).sum();
     }
 
+    /** Puntos que siguen vigentes pero vencen dentro de los próximos 'dias' días. */
+    public int getPuntosPorVencer(LocalDate hoy, int dias) {
+        return lotes.stream().filter(l -> l.isPorVencer(hoy, dias)).mapToInt(LotePuntos::getPuntosDisponibles).sum();
+    }
+
+    /** Fecha del vencimiento más cercano entre los lotes por vencer, o null si no hay ninguno. */
+    public LocalDate getProximoVencimiento(LocalDate hoy, int dias) {
+        return lotes.stream().filter(l -> l.isPorVencer(hoy, dias))
+                .map(LotePuntos::getFechaVencimiento).min(Comparator.naturalOrder()).orElse(null);
+    }
+
     public void redimir(int puntos, LocalDateTime fecha, String descripcion) throws PuntosInsuficientesException {
         int vigentes = getPuntosVigentes(fecha.toLocalDate());
         if (puntos > vigentes) {

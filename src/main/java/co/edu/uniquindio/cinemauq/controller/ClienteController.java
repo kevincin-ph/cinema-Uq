@@ -10,9 +10,12 @@ import co.edu.uniquindio.cinemauq.model.Pelicula;
 import co.edu.uniquindio.cinemauq.model.Promocion;
 import co.edu.uniquindio.cinemauq.model.Reembolso;
 import co.edu.uniquindio.cinemauq.model.confiteria.ItemConfiteria;
+import co.edu.uniquindio.cinemauq.model.enums.Genero;
 import co.edu.uniquindio.cinemauq.model.enums.MetodoPago;
 import co.edu.uniquindio.cinemauq.facade.OperacionesCliente;
 
+import java.text.Normalizer;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -64,6 +67,38 @@ public class ClienteController {
     }
 
     public int getPuntosVigentes() { return ops.getPuntosVigentes(cliente); }
+
+    /** Días de anticipación con los que se avisa al cliente que sus puntos van a vencer. */
+    public static final int DIAS_AVISO_VENCIMIENTO = 30;
+
+    public int getPuntosPorVencer() {
+        return cliente.getCuentaPuntos().getPuntosPorVencer(LocalDate.now(), DIAS_AVISO_VENCIMIENTO);
+    }
+
+    public LocalDate getProximoVencimiento() {
+        return cliente.getCuentaPuntos().getProximoVencimiento(LocalDate.now(), DIAS_AVISO_VENCIMIENTO);
+    }
+
+    /** Filtra la cartelera por texto en el título (sin importar tildes ni mayúsculas) y por género (null = todos). */
+    public List<Pelicula> buscarEnCartelera(String texto, Genero genero) {
+        String buscado = normalizar(texto);
+        List<Pelicula> resultado = new ArrayList<>();
+        for (Pelicula p : getCartelera()) {
+            boolean coincideTexto = buscado.isEmpty() || normalizar(p.getTitulo()).contains(buscado);
+            boolean coincideGenero = genero == null || p.getGenero() == genero;
+            if (coincideTexto && coincideGenero) {
+                resultado.add(p);
+            }
+        }
+        return resultado;
+    }
+
+    private static String normalizar(String texto) {
+        if (texto == null) {
+            return "";
+        }
+        return Normalizer.normalize(texto.trim().toLowerCase(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+    }
 
     public String getReglaPuntos() { return ops.getReglaPuntos(); }
 

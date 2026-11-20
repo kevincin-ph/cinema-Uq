@@ -10,16 +10,19 @@ import co.edu.uniquindio.cinemauq.model.Movimiento;
 import co.edu.uniquindio.cinemauq.model.MovimientoPuntos;
 import co.edu.uniquindio.cinemauq.model.Pelicula;
 import co.edu.uniquindio.cinemauq.model.Reembolso;
+import co.edu.uniquindio.cinemauq.model.enums.Genero;
 import co.edu.uniquindio.cinemauq.util.Formato;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -50,6 +53,10 @@ public class ClienteView {
     private final TableView<LotePuntos> tablaLotes = UI.tabla();
     private final TableView<MovimientoPuntos> tablaMovPuntos = UI.tabla();
     private final Label lblResumenPuntos = new Label();
+    private final Label lblAvisoPuntos = new Label();
+    private final TextField txtBuscar = new TextField();
+    private final ComboBox<String> cbGenero = new ComboBox<>();
+    private final Label lblResultados = new Label();
     private final ListView<String> listaNotificaciones = new ListView<>();
 
     public ClienteView(ClienteController controller) {
@@ -118,9 +125,50 @@ public class ClienteView {
         VBox derecha = UI.caja(UI.titulo("Funciones disponibles"), lblDetalle, listaFunciones, comprar);
         VBox.setVgrow(listaFunciones, Priority.ALWAYS);
         HBox.setHgrow(derecha, Priority.ALWAYS);
-        VBox izquierda = UI.caja(UI.titulo("Películas en cartelera"), listaPeliculas);
+        txtBuscar.setPromptText("Buscar por título...");
+        txtBuscar.textProperty().addListener((o, a, b) -> aplicarFiltro());
+        cbGenero.getItems().add("Todos los géneros");
+        for (Genero g : Genero.values()) {
+            cbGenero.getItems().add(nombreGenero(g));
+        }
+        cbGenero.getSelectionModel().selectFirst();
+        cbGenero.setMaxWidth(Double.MAX_VALUE);
+        cbGenero.setOnAction(e -> aplicarFiltro());
+        Button limpiar = new Button("Limpiar");
+        limpiar.getStyleClass().add("button-secondary");
+        limpiar.setOnAction(e -> {
+            txtBuscar.clear();
+            cbGenero.getSelectionModel().selectFirst();
+        });
+        HBox.setHgrow(txtBuscar, Priority.ALWAYS);
+        HBox busqueda = new HBox(8, txtBuscar, limpiar);
+        lblResultados.setStyle("-fx-text-fill: #777;");
+        VBox izquierda = UI.caja(UI.titulo("Películas en cartelera"), busqueda, cbGenero, lblResultados, listaPeliculas);
         VBox.setVgrow(listaPeliculas, Priority.ALWAYS);
         return new HBox(izquierda, derecha);
+    }
+
+    /** Vuelve a cargar la lista de películas según el texto buscado y el género elegido. */
+    private void aplicarFiltro() {
+        Pelicula sel = listaPeliculas.getSelectionModel().getSelectedItem();
+        int indice = cbGenero.getSelectionModel().getSelectedIndex();
+        Genero genero = indice <= 0 ? null : Genero.values()[indice - 1];
+        List<Pelicula> peliculas = controller.buscarEnCartelera(txtBuscar.getText(), genero);
+        listaPeliculas.setItems(FXCollections.observableArrayList(peliculas));
+        lblResultados.setText(peliculas.isEmpty() ? "No hay películas que coincidan."
+                : peliculas.size() + (peliculas.size() == 1 ? " película encontrada" : " películas encontradas"));
+        if (sel != null && peliculas.contains(sel)) {
+            listaPeliculas.getSelectionModel().select(sel);
+        } else {
+            lblDetalle.setText("Seleccione una película");
+            mostrarPelicula(null);
+        }
+    }
+
+    /** CIENCIA_FICCION -> "Ciencia ficcion" para mostrarlo bonito en el combo. */
+    private static String nombreGenero(Genero g) {
+        String t = g.name().replace('_', ' ').toLowerCase();
+        return Character.toUpperCase(t.charAt(0)) + t.substring(1);
     }
 
     private void mostrarPelicula(Pelicula p) {
@@ -201,29 +249,46 @@ public class ClienteView {
                 UI.col("Disponibles", l -> String.valueOf(l.getPuntosDisponibles())),
                 UI.col("Fecha de obtención", l -> Formato.fecha(l.getFechaObtencion())),
                 UI.col("Fecha de vencimiento", l -> Formato.fecha(l.getFechaVencimiento())),
-                UI.col("Estado", l -> l.isVigente(LocalDate.now()) ? "Vigente" : "Vencido"));
+                UI.col("Estado", l -> !l.isVigente(LocalDate.now()) ? "Vencido"
+                        : l.isPorVencer(LocalDate.now(), ClienteController.DIAS_AVISO_VENCIMIENTO) ? "Por vencer" : "Vigente"));
         UI.columnas(tablaMovPuntos,
                 UI.col("Fecha", m -> Formato.fechaHora(m.getFecha())),
                 UI.col("Tipo", m -> m.getTipo().name()),
                 UI.col("Puntos", m -> String.valueOf(m.getPuntos())),
                 UI.col("Descripción", MovimientoPuntos::getDescripcion));
+        // Resalta en naranja los lotes que vencen pronto y en gris los vencidos
+        tablaLotes.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(LotePuntos l, boolean vacio) {
+                super.updateItem(l, vacio);
+                if (vacio || l == null) {
+                    setStyle("");
+                } else if (l.isPorVencer(LocalDate.now(), ClienteController.DIAS_AVISO_VENCIMIENTO)) {
+                    setStyle("-fx-background-color: #ffe0b2;");
+                } else if (!l.isVigente(LocalDate.now())) {
+                    setStyle("-fx-background-color: #eeeeee; -fx-opacity: 0.7;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+        lblAvisoPuntos.setWrapText(true);
+        lblAvisoPuntos.setStyle("-fx-background-color: #fff3e0; -fx-border-color: #fb8c00; -fx-border-radius: 6;"
+                + " -fx-background-radius: 6; -fx-padding: 8 12; -fx-text-fill: #e65100; -fx-font-weight: bold;");
         Label regla = new Label(controller.getReglaPuntos()
                 + "\nPara redimir: en la compra elija el método de pago 'Puntos CinemaUQ'.");
         regla.setWrapText(true);
         lblResumenPuntos.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        return UI.caja(UI.titulo("Mis puntos CinemaUQ"), lblResumenPuntos, regla, new Label("Lotes de puntos:"), tablaLotes,
+        return UI.caja(UI.titulo("Mis puntos CinemaUQ"), lblResumenPuntos, lblAvisoPuntos, regla, new Label("Lotes de puntos:"), tablaLotes,
                 new Label("Movimientos:"), tablaMovPuntos);
     }
 
     private void refrescar() {
         lblSaldo.setText("Saldo: " + Formato.moneda(cliente.getTarjeta().getSaldo()));
-        lblPuntos.setText("Puntos: " + controller.getPuntosVigentes());
+        int porVencer = controller.getPuntosPorVencer();
+        lblPuntos.setText("Puntos: " + controller.getPuntosVigentes() + (porVencer > 0 ? "  ⚠ " + porVencer + " por vencer" : ""));
 
-        Pelicula sel = listaPeliculas.getSelectionModel().getSelectedItem();
-        listaPeliculas.setItems(FXCollections.observableArrayList(controller.getCartelera()));
-        if (sel != null) {
-            listaPeliculas.getSelectionModel().select(sel);
-        }
+        aplicarFiltro();
 
         tablaCompras.setItems(FXCollections.observableArrayList(controller.getCompras()));
 
@@ -236,6 +301,15 @@ public class ClienteView {
 
         lblResumenPuntos.setText("Puntos vigentes: " + controller.getPuntosVigentes() + "     Puntos vencidos: "
                 + cliente.getCuentaPuntos().getPuntosVencidos(LocalDate.now()));
+        if (porVencer > 0) {
+            lblAvisoPuntos.setText("⚠ Tiene " + porVencer + " puntos que vencen pronto (el primero el "
+                    + Formato.fecha(controller.getProximoVencimiento()) + "). Úselos antes en entradas, productos o combos.");
+            lblAvisoPuntos.setVisible(true);
+            lblAvisoPuntos.setManaged(true);
+        } else {
+            lblAvisoPuntos.setVisible(false);
+            lblAvisoPuntos.setManaged(false);
+        }
         tablaLotes.setItems(FXCollections.observableArrayList(cliente.getCuentaPuntos().getLotes()));
         List<MovimientoPuntos> mp = new ArrayList<>(cliente.getCuentaPuntos().getMovimientos());
         Collections.reverse(mp);
